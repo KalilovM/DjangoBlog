@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
-from helpers import PathAndRename
+from main.helpers import PathAndRename
 from datetime import datetime
 from django.urls import reverse
 
@@ -29,7 +29,7 @@ class Profile(models.Model):
         ordering = ['-created_at']
 
 
-class Contact(models.Model)
+class Contact(models.Model):
     user_to = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='to_set', verbose_name='На')
     user_from = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='from_set', verbose_name='От')
     created_at = models.DateTimeField(auto_now_add=True, db_index=True, verbose_name='Создано')
@@ -43,9 +43,7 @@ class Contact(models.Model)
         verbose_name_plural = 'Подписки'
         constraints = [
             models.CheckConstraint(
-                check =~ models.Q(user_from=models.F('user_to')),
-                name = 'check_self_follow'
+                check=~ models.Q(user_from=models.F('user_to')),
+                name='check_self_follow'
             )
         ]
-
-
