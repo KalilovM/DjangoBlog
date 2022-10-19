@@ -104,13 +104,11 @@ class UserCreateSerializer(ErrorMessagesSerializerMixin, serializers.ModelSerial
     def perform_create(self, validated_data: OrderedDict) -> User:
         password = validated_data.pop('password')
         profile_attrs: dict = validated_data.pop('profile', None)
-
         user: User = User.objects.create_user(**validated_data)
+        Profile.objects.create(user=user)
         user.set_password(password)
         user.is_active = False
-
         profile = self.setup_user_profile(profile_attrs, user.profile)
-
         user.save()
         profile.save()
         return user
