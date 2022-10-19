@@ -95,7 +95,8 @@ class UserCreateSerializer(ErrorMessagesSerializerMixin, serializers.ModelSerial
         except IntegrityError:
             self.fail('cannot_create_user')
 
-    def setup_user_profile(self, attrs: dict, profile: Profile) -> Profile:
+    @staticmethod
+    def setup_user_profile(attrs: dict, profile: Profile) -> Profile:
         for key in attrs:
             if not attrs.get(key) is None:
                 setattr(profile, key, attrs.get(key))

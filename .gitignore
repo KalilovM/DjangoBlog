@@ -1,0 +1,4 @@
+/photos/
+/*/migrations
+db.sqlite3
+/venv
