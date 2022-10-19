@@ -11,6 +11,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.password_validation import validate_password
 import re  # Regular expressions
 from django.db.utils import IntegrityError
+from django.utils import timezone
 
 
 class UserCreateProfileSerializer(serializers.ModelSerializer, ErrorMessagesSerializerMixin):
@@ -19,15 +20,15 @@ class UserCreateProfileSerializer(serializers.ModelSerializer, ErrorMessagesSeri
         'invalid_image': serializers.ImageField.default_error_messages.get(
             'invalid_message', _('Файл который вы загрузили, поврежден или не является изображением')),
         'age_under_fourteen': _('Вам меньше 14 лет'),
-        'age_more_than_hunred': _('Вы не можете указать возраст больше 100'),
+        'age_more_than_hundred': _('Вы не можете указать возраст больше 100'),
     }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['avatar'].error_message['invalid'] = self.default_error_messages.get('invalid_image')
+        self.fields['avatar'].error_messages['invalid'] = self.default_error_messages.get('invalid_image')
 
     def validate_birthday(self, value: date) -> Union[date, None]:
-        today = date.today()
+        today = timezone.now()
 
         if relativedelta(today, value).years < 14:
             self.fail('age_under_fourteen')
@@ -39,36 +40,39 @@ class UserCreateProfileSerializer(serializers.ModelSerializer, ErrorMessagesSeri
 
     class Meta:
         model = Profile
-        fields = ['avatar', 'birthday', 'city']
+        fields = ['avatar', 'birthday']
         extra_kwargs = {
             'birthday': {'required': True, 'allow_null': False},
-            'city': {'required': True, 'allow_null': False},
         }
 
 
-class UserCreateSerializer(serializers.ModelSerializer, ErrorMessagesSerializerMixin):
-    email = serializers.EmailField(lebel='Адрес электронной почты', required=True, write_only=True)
+class UserCreateSerializer(ErrorMessagesSerializerMixin, serializers.ModelSerializer):
+    email = serializers.EmailField(label='Адрес электронной почты', required=True, write_only=True)
     profile = UserCreateProfileSerializer(required=True)
 
     default_error_messages = {
-        'cannot_create_user': _('Не получилось создать пользователя попробуйте снова'),
+        'cannot_create_user': _('Не получилось создать пользователя, попробуйте снова.'),
+
         'username_contains_only_digits': {
-            'username': _("Логин не может состоять только из цифр")},
+            'username': _('Логин не может состоять только из цифр.')
+        },
         'first_name_contains_digits': {
-            "first_name": _("В имени не могут быть цифры")},
+            'first_name': _('В имени не могут быть цифры.'),
+        },
         'last_name_contains_digits': {
-            "last_name": _("В фамилии не могут быть цифры")},
+            'last_name': _('В фамилии не могут быть цифры.'),
+        },
     }
 
     class Meta:
         model = User
-        fields = ['email', 'username', 'first_name', 'last_name', 'password', 'is_active', 'profile']
+        fields = ('email', 'username', 'first_name', 'last_name', 'password', 'is_active', 'profile')
         extra_kwargs = {
             'password': {'write_only': True, 'validators': [validate_password]},
-            'username': {'max_length': 50, 'min_length': 4},
             'is_active': {'read_only': True},
+            'username': {'max_length': 50, 'min_length': 4},
             'first_name': {'required': True, 'allow_blank': False, 'max_length': 30},
-            'last_name': {'required': True, 'allow_blank': False, 'max_length': 30}
+            'last_name': {'required': True, 'allow_blank': False, 'max_length': 30},
         }
 
     def validate_names(self, username: str, first_name: str, last_name: str) -> None:
@@ -97,7 +101,7 @@ class UserCreateSerializer(serializers.ModelSerializer, ErrorMessagesSerializerM
                 setattr(profile, key, attrs.get(key))
         return profile
 
-    def perform_create(self, validated_data: OrderedDict):
+    def perform_create(self, validated_data: OrderedDict) -> User:
         password = validated_data.pop('password')
         profile_attrs: dict = validated_data.pop('profile', None)
 

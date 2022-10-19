@@ -1,3 +1,10 @@
 from django.shortcuts import render
+from .serializers import UserCreateSerializer
+from rest_framework import generics
+from .permissions import IsAnonymous
 
-# Create your views here.
+
+class UserRegisterAPIView(generics.CreateAPIView):
+    """Endpoint to create user"""
+    serializer_class = UserCreateSerializer
+    permission_classes = (IsAnonymous,)
