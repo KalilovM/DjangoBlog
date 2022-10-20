@@ -1,11 +1,13 @@
+from typing import TypeVar, Type
 from rest_framework import serializers
 from django.contrib.auth.models import User
 from drf_spectacular.utils import extend_schema_field
-from typing import TypeVar
+from rest_framework.fields import empty
 
 
-class AutorSerializer(serializers.ModelSerializer):
-    """Serializer of the data required to represent the author"""
+class AuthorSerializer(serializers.ModelSerializer):
+    """Serializers of the data required to represent the author"""
+
     avatar = serializers.SerializerMethodField()
 
     def get_avatar(self, obj):
@@ -25,23 +27,24 @@ class AutorSerializer(serializers.ModelSerializer):
     'example': {
         'first_name': 'string',
         'last_name': 'string',
-        'avatar': 'string'
+        'avatar': 'string',
     }
 })
 class CurrentAuthorField(serializers.Field):
     """
     The author field, which requires the User object at the input and returns the author's data for it.
-    ignores any input value, focusing only on the default value.
+    Ignores any input value, focusing only on the default view
     """
 
-    T = TypeVar("T")
+    T = TypeVar('T')
 
-    def get_value(self, dictionary: dict) -> serializers.empty:
+    def get_value(self, dictionary: dict) -> Type[empty]:
         return serializers.empty
 
     def to_representation(self, value: User) -> dict:
         """To JSON"""
-        return AutorSerializer(instance=value, context={'request': self.context.get('request')}).data
+        return AuthorSerializer(instance=value, context={'request': self.context.get('request')}).data
 
     def to_internal_value(self, data: T) -> T:
         return data
+
