@@ -8,22 +8,23 @@ from mptt.models import MPTTModel
 from mptt.fields import TreeForeignKey
 
 
-class Image(models.Model):
-    post = models.ForeignKey('Post', on_delete=models.CASCADE, related_name='images', related_query_name='images',
-                             verbose_name='Пост', null=True, blank=True)
-    comment = models.ForeignKey('Comment', on_delete=models.CASCADE, related_name='image_comment',
-                                related_query_name='image_comment', verbose_name='Комментарий', null=True, blank=True)
-    photo = models.ImageField(upload_to=PathAndRename(f'photos/posts/{datetime.now().year}/{datetime.now().month}/'))
-    author = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Автор")
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self) -> str:
-        return self.photo.name.split('/')[-1]
-
-    class Meta:
-        verbose_name = 'фото'
-        verbose_name_plural = 'фотографии'
-        ordering = ['created_at']
+# TODO: Implement multiple image to the lesson or course to better explanation all information
+# class Image(models.Model):
+#     post = models.ForeignKey('Post', on_delete=models.CASCADE, related_name='images', related_query_name='images',
+#                              verbose_name='Пост', null=True, blank=True)
+#     comment = models.ForeignKey('Comment', on_delete=models.CASCADE, related_name='image_comment',
+#                                 related_query_name='image_comment', verbose_name='Комментарий', null=True, blank=True)
+#     photo = models.ImageField(upload_to=PathAndRename(f'photos/posts/{datetime.now().year}/{datetime.now().month}/'))
+#     author = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Автор")
+#     created_at = models.DateTimeField(auto_now_add=True)
+#
+#     def __str__(self) -> str:
+#         return self.photo.name.split('/')[-1]
+#
+#     class Meta:
+#         verbose_name = 'фото'
+#         verbose_name_plural = 'фотографии'
+#         ordering = ['created_at']
 
 
 class Post(models.Model):
@@ -74,5 +75,5 @@ class Comment(MPTTModel):
         verbose_name_plural = "Коментарии"
         ordering = ['-created_at']
 
-    class MPTTMeta:
+    class MPTTMeta: # Just ordering for node tree's childrens
         order_insertion_by = ['-created_at']
