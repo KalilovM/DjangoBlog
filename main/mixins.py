@@ -1,4 +1,6 @@
 from rest_framework import serializers
+from rest_framework.settings import api_settings
+from core.permissions import IsAuthorOrReadOnly
 
 
 class ErrorMessagesSerializerMixin:
@@ -24,3 +26,11 @@ class ErrorMessagesSerializerMixin:
             raise KeyError(msg)
 
         raise serializers.ValidationError(msg, code=key)
+
+
+class IsAuthorPermissionsMixin:
+    """
+    Adds IsAuthorOrReadOnly permission
+    """
+
+    permission_classes = api_settings.DEFAULT_PERMISSION_CLASSES + [IsAuthorOrReadOnly]

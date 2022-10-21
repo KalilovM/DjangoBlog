@@ -19,7 +19,7 @@ from mptt.models import MPTTModel
 
 class PostSerializer(serializers.ModelSerializer, ErrorMessagesSerializerMixin):
     viewers_count = serializers.IntegerField(read_only=True)
-    liked_coint = serializers.IntegerField(read_only=True)
+    liked_count = serializers.IntegerField(read_only=True)
     author_is_user_following = serializers.BooleanField(read_only=True)
     is_user_liked_post = serializers.BooleanField(read_only=True)
     author = CurrentAuthorField(default=serializers.CurrentUserDefault())

@@ -44,4 +44,25 @@ class PostFilter(filters.FilterSet):
             return queryset
 
         following = self.request.user.following
-        #TOBE CONTINUED
+        ordering = self.data.get('ordering')
+
+        if ordering:
+            return queryset.annotiate(flag=Exists(following.filter(id=OuterRef('author__profile__id')))).order_by(
+                '-flug', ordering)
+
+        return queryset.annotate(flag=Exists(following.filter(id=OuterRef('author__profile__id')))) \
+            .order_by('-flag', '-created_at')
+
+    def filter_popular(self,queryset, name, value: bool):
+        """Order by likes"""
+
+        if not value:
+            return queryset
+
+        ordering = self.data.get("ordering")
+
+        if ordering:
+            return queryset.annotate(liked_count=Count('liked')).order_by('-liked_count', ordering)
+
+        return queryset.annotate(liked_count=Count('liked')).order_by('-liked_count', '-created_at')
+
