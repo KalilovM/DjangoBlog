@@ -1,6 +1,6 @@
 from typing import TypeVar, Type
 from rest_framework import serializers
-from django.contrib.auth.models import User
+from .models import Profile
 from drf_spectacular.utils import extend_schema_field
 from rest_framework.fields import empty
 
@@ -16,7 +16,7 @@ class AuthorSerializer(serializers.ModelSerializer):
         return field.to_representation(obj.profile.avatar)
 
     class Meta:
-        model = User
+        model = Profile
         fields = ['first_name', 'last_name', 'avatar']
 
 
@@ -32,7 +32,7 @@ class AuthorSerializer(serializers.ModelSerializer):
 })
 class CurrentAuthorField(serializers.Field):
     """
-    The author field, which requires the User object at the input and returns the author's data for it.
+    The author field, which requires the Profile object at the input and returns the author's data for it.
     Ignores any input value, focusing only on the default view
     """
 
@@ -41,7 +41,7 @@ class CurrentAuthorField(serializers.Field):
     def get_value(self, dictionary: dict) -> Type[empty]:
         return serializers.empty
 
-    def to_representation(self, value: User) -> dict:
+    def to_representation(self, value: Profile) -> dict:
         """To JSON"""
         return AuthorSerializer(instance=value, context={'request': self.context.get('request')}).data
 

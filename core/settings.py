@@ -28,10 +28,12 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'rest_framework',
-    "mptt"
+    "mptt",
+    "django_filters",
 
     'main',
     'users',
+    'courses',
 ]
 
 MIDDLEWARE = [
@@ -50,6 +52,8 @@ REST_FRAMEWORK = {
     ],
 }
 
+
+AUTH_USER_MODEL = 'users.Profile'
 ROOT_URLCONF = 'core.urls'
 
 TEMPLATES = [

@@ -1,14 +1,13 @@
 from django.db import models
-from django.contrib.auth.models import User
+from django.contrib.auth.models import AbstractUser
 from main.helpers import PathAndRename
 from datetime import datetime
 from django.urls import reverse
 
 
-class Profile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile', related_query_name='profile',
-                                verbose_name='Пользователь')
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Создан")
+class Profile(AbstractUser):
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
+    updated_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата обновления")
     bio = models.CharField(max_length=100, verbose_name="Статус", blank=True)
     avatar = models.ImageField(verbose_name='Аватарка', blank=True,
                                upload_to=PathAndRename(f'photos/avatars/{datetime.now().year}/{datetime.now().month}'))
@@ -17,8 +16,9 @@ class Profile(models.Model):
     github = models.CharField(max_length=100, null=True, blank=True)
     telegram = models.CharField(max_length=100, null=True, blank=True)
 
+
     def __str__(self):
-        return self.user.username
+        return self.username
 
     def get_absolute_url(self) -> str:
         return reverse('profile', kwargs={'pk': self.pk})

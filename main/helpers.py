@@ -3,6 +3,7 @@ from django.forms.fields import ImageField as ImageFieldValidator
 from rest_framework import serializers
 from django.utils.deconstruct import deconstructible
 from django.utils.translation import gettext as _
+from PIL import Image
 from uuid import uuid4
 import os
 
@@ -40,10 +41,10 @@ def run_images_validators(images: Collection) -> None:
             'max_file_legth': _("Не допустимое количество файлов, Максимальное кол-во файлов: 10")
         })
 
-    images_validator(images)
+    images_validator(images, 8)
 
 
-def images_validator(images: Iterable) -> None:
+def images_validator(images: Iterable, size: int) -> None:
     """
     Iterate images and checks each of them is really an image
     """
@@ -51,7 +52,7 @@ def images_validator(images: Iterable) -> None:
     img_validator = ImageFieldValidator().to_python
 
     for image in images:
-        if image.size / 1024 / 1024 > 8:
+        if image.size / 1024 / 1024 > size:
             raise serializers.ValidationError({
                 'file_too_large': _("Файл который вы загрузили слишком большой")
             })

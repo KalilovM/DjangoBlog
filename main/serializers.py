@@ -1,17 +1,20 @@
 from rest_framework import serializers
-from .models import Image, Post, Comment
+from rest_framework.utils.serializer_helpers import ReturnDict
+
+from .models import Post, Comment
 from .fields import CurrentAuthorField
 from django.utils.translation import gettext as _
-from helpers import run_images_validators
-from typing import Iterable, Collection
+from helpers import images_validator
+from typing import Iterable, Collection, Any
 from .mixins import ErrorMessagesSerializerMixin
 from mptt.models import MPTTModel
 
 
-class ImageSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Image
-        fields = ['photo']
+# TODO ADD IMAGES TO COURSES
+# class ImageSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Image
+#         fields = ['photo']
 
 
 class PostSerializer(serializers.ModelSerializer, ErrorMessagesSerializerMixin):
@@ -20,44 +23,48 @@ class PostSerializer(serializers.ModelSerializer, ErrorMessagesSerializerMixin):
     author_is_user_following = serializers.BooleanField(read_only=True)
     is_user_liked_post = serializers.BooleanField(read_only=True)
     author = CurrentAuthorField(default=serializers.CurrentUserDefault())
-    images = ImageSerializer(many=True, read_only=True)
 
     default_error_messages = {
-        'empty_post': _('Пустой пост')
+        'empty_post': _('Пустой пост'),
+        'image_size_not_valid': _('Изображение слишком большое'),
+        'image_dimension_not_valid': _("Размер изображения не подходит")
     }
 
     def validate(self, attrs: dict) -> None:
         request = self.context.get('request')
-        images, title, content = request.FILES.getlist('images'), attrs.get('title'), attrs.get('content')
+        cover, title, content = attrs.get('cover'), attrs.get('title'), attrs.get('content')
 
-        if not any((images, title, content)):
+        if not any((cover, title, content)):
             self.fail('empty_post')
 
-        run_images_validators(images)
+        images_validator(cover, 1)
 
         return super().validate(attrs)
 
-    def image_create(self, images: Iterable, post_id: int, is_update: bool = False) -> None:
-        """Add images to the post"""
-
-        if is_update and any(images):
-            Image.objects.filter(post_id=post_id).delete()
-
-        author = self.context.get('request').user
-
-        for image in images:
-            Image.objects.create(post_id=post_id, photo=image, author=author)
+    # TODO фотографии для поста, загатовка для большого количества фотографий
+    # def image_create(self, images: Iterable, post_id: int, is_update: bool = False) -> None:
+    #     """Add images to the post"""
+    #
+    #     if is_update and any(images):
+    #         Image.objects.filter(post_id=post_id).delete()
+    #
+    #     author = self.context.get('request').user
+    #
+    #     for image in images:
+    #         Image.objects.create(post_id=post_id, photo=image, author=author)
 
     def create(self, validated_data: dict) -> Post:
         instance = super().create(validated_data)
-        images = self.context.get('request').FILES.getlist('images')
-        self.image_create(images, instance.id)
+        # TODO фотографии для поста, загатовка для большого количества фотографий
+        # images = self.context.get('request').FILES.getlist('images')
+        # self.image_create(images, instance.id)
         return instance
 
     def update(self, instance, validated_data: dict) -> Post:
         instance = super().update(instance, validated_data)
-        images = self.context.get('request').FILES.getlist('images')
-        self.image_create(images, instance.id, is_update=True)
+        # TODO фотографии для поста, загатовка для большого количества фотографий
+        # images = self.context.get('request').FILES.getlist('images')
+        # self.image_create(images, instance.id, is_update=True)
         return instance
 
     class Meta:
@@ -71,7 +78,8 @@ class PostSerializer(serializers.ModelSerializer, ErrorMessagesSerializerMixin):
 class CommentSerializer(serializers.ModelSerializer, ErrorMessagesSerializerMixin):
     is_user_liked_comment = serializers.BooleanField(read_only=True)
     like_count = serializers.IntegerField(read_only=True)
-    image_comment = ImageSerializer(read_only=True, many=True)
+    # TODO фотографии для поста, загатовка для большого количества фотографий
+    # image_comment = ImageSerializer(read_only=True, many=True)
     author = CurrentAuthorField(default=serializers.CurrentUserDefault())
     children = serializers.SerializerMethodField()
 
@@ -82,7 +90,7 @@ class CommentSerializer(serializers.ModelSerializer, ErrorMessagesSerializerMixi
         }
     }
 
-    def get_grandchildren(self,childrens: Collection[MPTTModel]) -> list:
+    def get_grandchildren(self, childrens: Collection[MPTTModel]) -> list:
         """
         This method is designed to form a flat list of node descendants up to the second level
         thereby greatly facilitating the work of the frontend.
@@ -108,13 +116,13 @@ class CommentSerializer(serializers.ModelSerializer, ErrorMessagesSerializerMixi
         for children in childrens:
             grandson = children.get_children().first()
             if grandson:
-                grandchildren.extend([children,grandson])
+                grandchildren.extend([children, grandson])
             else:
-                grandchildren.extend(children)
+                grandchildren.extend([children])
 
         return grandchildren[:2]
 
-    def get_children(self,obj: Comment) -> dict:
+    def get_children(self, obj: Comment) -> Any | None:
         """
         if the comment is root comment and children are not disabled,
         get the children up to the second level (see get_grandchildren)
@@ -122,22 +130,22 @@ class CommentSerializer(serializers.ModelSerializer, ErrorMessagesSerializerMixi
 
         if not (obj.level == 0 and not self.context.get('not_children')):
             return
-        childrens = obj.get_children()[:2]
-        descendants = self.get_grandchildren(childrens)
-        return self.__class__(descendants,manu=True,context=self.context).data
+        children = obj.get_children()[:2]
+        descendants = self.get_grandchildren(children)
+        return self.__class__(descendants, manu=True, context=self.context).data
 
     def validate(self, attrs: dict) -> None:
         request = self.context.get('request')
-        images, body = request.FILES.getlist('images'), attrs.get('body')
-        parent, post_id = attrs.get('parent'), attrs.get('post').id
+        # images, body = request.FILES.getlist('images'), attrs.get('body')
+        parent, body, post_id = attrs.get('parent'), attrs.get('body'), attrs.get('post').id
 
-        if not any((images, body)):
+        if not any(body):
             self.fail('empty_comment')
 
         if parent:
-            if not Comment.object.filter(id=parent.id, post_id=post_id,is_active=True).exists():
+            if not Comment.objects.filter(id=parent.id, post=post_id, is_active=True).exists():
                 self.fail('parent_comment_reference_to_other_post')
 
-        run_images_validators(images)
-        
+        # run_images_validators(images)
+
         return super().validate(attrs)

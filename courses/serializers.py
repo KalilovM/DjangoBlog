@@ -1,10 +1,11 @@
 from rest_framework import serializers
+from rest_framework.utils.serializer_helpers import ReturnDict
 from main.fields import CurrentAuthorField
 from django.utils.translation import gettext as _
 from main.mixins import ErrorMessagesSerializerMixin
 from main.helpers import run_images_validators
 from PIL import Image
-from .models import Course
+from .models import Course, Comment
 from typing import Collection
 from mptt.models import MPTTModel
 
@@ -54,7 +55,7 @@ class CourseSerializer(serializers.ModelSerializer, ErrorMessagesSerializerMixin
         ]
 
 
-class CommentSerializer(serializers.ModelSerializer):
+class CommentSerializer(serializers.ModelSerializer, ErrorMessagesSerializerMixin):
     is_user_liked_comment = serializers.BooleanField(read_only=True)
     comment_liked_count = serializers.IntegerField(read_only=True)
     author = CurrentAuthorField(default=serializers.CurrentUserDefault)
@@ -62,7 +63,7 @@ class CommentSerializer(serializers.ModelSerializer):
 
     default_error_messages = {
         'empty_comment': _("Пустой коммент"),
-        'parant_reference_to_other': {
+        'parent_reference_to_other': {
             'parent': _("Родительский комментарий оставлен под другим постом")
         }
     }
@@ -95,5 +96,54 @@ class CommentSerializer(serializers.ModelSerializer):
             if grandson:
                 grandchildren.extend([children, grandson])
             else:
-                pass
-            # TOBE CONTINUED
+                grandchildren.extend([children])
+
+            return grandchildren[:2]
+
+    def get_children(self, obj: Comment) -> dict | None:
+        """
+        if the comment is root comment and children are not disabled,
+        get the children up to the second level (see get_grandchildren).
+        """
+
+        if not (obj.get_level() == 0 and not self.context.get('not_children')):
+            return
+
+        children = obj.get_children()[:2]
+
+        descendants = self.get_grandchildren(children)
+        return self.__class__(descendants, many=True, context=self.context).data
+
+    def validate(self, attrs: dict) -> None:
+        request = self.context.get('request')
+        content, parent, lesson_id = attrs.get('content'), attrs.get('parent'), attrs.get('lesson').id
+
+        if not content:
+            self.fail('empty_comment')
+
+        if parent:
+            if not Comment.objects.filter(id=parent.id, lesson_id=lesson_id, is_active=True).exists():
+                self.fail('parent_reference_to_other')
+
+        return super().validate(attrs)
+
+    def create(self, validated_data):
+        return super().create(validated_data)
+
+    class Meta:
+        model = Comment
+        fields = [
+            "id", 'lesson', 'created_at', 'updated_at', 'parent', 'content', 'is_user_liked_comment', 'children',
+            'comment_liked_count', 'author'
+        ]
+        extra_kwargs = {
+            'body': {'required': False}
+        }
+
+
+class CommentUpdateSerializer(serializers.ModelSerializer):
+    parent = serializers.PrimaryKeyRelatedField(read_only=True)
+
+    def update(self, instance: Comment, validated_data: dict):
+        return super().update(instance, validated_data)
+    
