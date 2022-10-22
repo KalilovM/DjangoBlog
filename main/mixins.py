@@ -34,3 +34,25 @@ class IsAuthorPermissionsMixin:
     """
 
     permission_classes = api_settings.DEFAULT_PERMISSION_CLASSES + [IsAuthorOrReadOnly]
+
+
+class CacheTreeQuerysetMixin:
+    '''
+    A mixin that caches the list of records obtained via mptt.get_cached_trees
+    into the _cached_queryset attribute.
+    Otherwise, two identical queries will be executed
+    Supported depth attribute which specifies the length of mptt descendants
+    '''
+
+    _cached_queryset: list = None
+    depth:int = None
+
+    def _get_cached_queryset(self,queryset):
+
+        if self.depth:
+            queryset = queryset.filter(level__lte=self.depth)
+
+        if not self._cached_queryset:
+            self._cached_queryset = get_cached_trees(queryset)
+
+        return self._cached_queryset
