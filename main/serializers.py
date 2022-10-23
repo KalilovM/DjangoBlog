@@ -4,7 +4,7 @@ from rest_framework.utils.serializer_helpers import ReturnDict
 from .models import Post, Comment
 from .fields import CurrentAuthorField
 from django.utils.translation import gettext as _
-from helpers import images_validator
+from main.helpers import images_validator
 from typing import Iterable, Collection, Any
 from .mixins import ErrorMessagesSerializerMixin
 from mptt.models import MPTTModel
@@ -149,3 +149,24 @@ class CommentSerializer(serializers.ModelSerializer, ErrorMessagesSerializerMixi
         # run_images_validators(images)
 
         return super().validate(attrs)
+
+    def create(self, validated_data: dict) -> Comment:
+        return super().create(validated_data)
+
+    class Meta:
+        model = Comment
+        fields = [
+            'id', 'post', 'created_at', 'updated_at', 'parent', 'body', 'is_user_liked_comment', 'children',
+            'like_count', 'author'
+        ]
+        extra_kwargs = {
+            'body': {'required': False}
+        }
+
+
+class CommentUpdateSerializer(serializers.ModelSerializer):
+    parent = serializers.PrimaryKeyRelatedField(read_only=True)
+
+    def update(self, instance: Comment, validated_data:dict) -> Comment:
+        return super().update(instance, validated_data)
+
