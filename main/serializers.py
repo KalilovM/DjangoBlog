@@ -18,7 +18,7 @@ from mptt.models import MPTTModel
 
 
 class PostSerializer(serializers.ModelSerializer, ErrorMessagesSerializerMixin):
-    viewers_count = serializers.IntegerField(read_only=True)
+    views_count = serializers.IntegerField(read_only=True)
     liked_count = serializers.IntegerField(read_only=True)
     author_is_user_following = serializers.BooleanField(read_only=True)
     is_user_liked_post = serializers.BooleanField(read_only=True)
@@ -37,7 +37,8 @@ class PostSerializer(serializers.ModelSerializer, ErrorMessagesSerializerMixin):
         if not any((cover, title, content)):
             self.fail('empty_post')
 
-        images_validator(cover, 1)
+        # images_validator(cover, 1)
+        # TODO Make image validator by size, width and height
 
         return super().validate(attrs)
 
@@ -71,7 +72,7 @@ class PostSerializer(serializers.ModelSerializer, ErrorMessagesSerializerMixin):
         model = Post
         fields = [
             'id', 'title', 'content', 'created_at', 'updated_at', 'author', 'views_count', 'liked_count',
-            'author_in_user_following', 'is_user_liked_post', 'images',
+            'author_is_user_following', 'is_user_liked_post','cover'
         ]
 
 

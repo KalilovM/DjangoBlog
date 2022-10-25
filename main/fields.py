@@ -13,7 +13,7 @@ class AuthorSerializer(serializers.ModelSerializer):
     def get_avatar(self, obj):
         field = serializers.ImageField()
         field.bind('avatar', self)
-        return field.to_representation(obj.profile.avatar)
+        return field.to_representation(obj.avatar)
 
     class Meta:
         model = Profile

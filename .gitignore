@@ -1,5 +1,7 @@
 /photos/
-/*/migrations
+migrations/
 db.sqlite3
 /venv
 ./photos/
+post_cover/
+__pycache__/

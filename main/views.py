@@ -35,9 +35,9 @@ class PostViewSet(PartialViewSet, IsAuthorPermissionsMixin):
         posts = Post.objects.annotate(
             viewers_count=Count('viewers', distinct=True),
             liked_coint=Count('liked', distinct=True),
-            author_is_user_following=Exists(this_user.following.filter(id=OuterRef('author__profile__id'))),
-            is_user_liked_post=Exists(this_user.liked.filter(id=OuterRef('id')))) \
-            .select_related('author', 'author__profile').order_by('-created_at')
+            author_is_user_following=Exists(this_user.following.filter(id=OuterRef('author__id'))),
+            is_user_liked_post=Exists(this_user.post_liked.filter(id=OuterRef('id')))) \
+            .select_related('author').order_by('-created_at')
         # .prefetch_related('images') изображения для поста
         return posts
 

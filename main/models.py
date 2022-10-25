@@ -26,16 +26,15 @@ from mptt.fields import TreeForeignKey
 #         ordering = ['created_at']
 
 class Post(models.Model):
-    profile = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='posts_profile', verbose_name='Профиль',
-                                null=True)
     title = models.CharField(max_length=150, verbose_name="Названия", blank=True)
     content = models.TextField(verbose_name='Контент', blank=True)
+    cover = models.ImageField(upload_to=PathAndRename(f"post_cover/{datetime.year}/{datetime.month}/"))
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Создано')
     updated_at = models.DateTimeField(auto_now=True, verbose_name='Обновлено')
     viewers = models.ManyToManyField(Profile, related_name='posts', related_query_name='posts',
                                      verbose_name='Просмотры',
                                      blank=True)
-    author = models.ForeignKey(Profile, verbose_name='Автор', on_delete=models.CASCADE)
+    author = models.ForeignKey(Profile, verbose_name='Автор', on_delete=models.CASCADE, related_name="post_author", related_query_name='post_author')
     liked = models.ManyToManyField(Profile, verbose_name='Лайкнувшие', related_name='post_liked',
                                    related_query_name='post_liked',
                                    blank=True)

@@ -1,9 +1,10 @@
-from typing import Any, Iterable, Collection, Sized
+from typing import Any, Iterable, Collection
 from django.forms.fields import ImageField as ImageFieldValidator
+from django.core.files.base import ContentFile
 from rest_framework import serializers
 from django.utils.deconstruct import deconstructible
 from django.utils.translation import gettext as _
-from PIL import Image
+from django.core.files.images import get_image_dimensions
 from uuid import uuid4
 import os
 
@@ -44,15 +45,19 @@ def run_images_validators(images: Collection) -> None:
     images_validator(images, 8)
 
 
-def images_validator(images: Iterable, size: int) -> None:
+def images_validator(images: Iterable, sizeImg: int) -> None:
     """
     Iterate images and checks each of them is really an image
     """
 
     img_validator = ImageFieldValidator().to_python
-
+    #TODO error occured when trying to validate image
+    #bytes couldn't operate with int or 
+    #    "non_field_errors": [
+    #    "Ни одного файла не было отправлено. Проверьте тип кодировки формы."
     for image in images:
-        if image.size / 1024 / 1024 > size:
+        print(ContentFile(image).size )
+        if ContentFile(image).size / 1024 / 1024 > sizeImg:
             raise serializers.ValidationError({
                 'file_too_large': _("Файл который вы загрузили слишком большой")
             })
