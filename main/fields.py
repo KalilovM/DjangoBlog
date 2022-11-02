@@ -12,39 +12,42 @@ class AuthorSerializer(serializers.ModelSerializer):
 
     def get_avatar(self, obj):
         field = serializers.ImageField()
-        field.bind('avatar', self)
+        field.bind("avatar", self)
         return field.to_representation(obj.avatar)
 
     class Meta:
         model = Profile
-        fields = ['first_name', 'last_name', 'avatar']
+        fields = ["first_name", "last_name", "avatar"]
 
 
-@extend_schema_field({
-    'type': 'string',
-    'format': 'string',
-    'read_only': True,
-    'example': {
-        'first_name': 'string',
-        'last_name': 'string',
-        'avatar': 'string',
+@extend_schema_field(
+    {
+        "type": "string",
+        "format": "string",
+        "read_only": True,
+        "example": {
+            "first_name": "string",
+            "last_name": "string",
+            "avatar": "string",
+        },
     }
-})
+)
 class CurrentAuthorField(serializers.Field):
     """
     The author field, which requires the Profile object at the input and returns the author's data for it.
     Ignores any input value, focusing only on the default view
     """
 
-    T = TypeVar('T')
+    T = TypeVar("T")
 
     def get_value(self, dictionary: dict) -> Type[empty]:
         return serializers.empty
 
     def to_representation(self, value: Profile) -> dict:
         """To JSON"""
-        return AuthorSerializer(instance=value, context={'request': self.context.get('request')}).data
+        return AuthorSerializer(
+            instance=value, context={"request": self.context.get("request")}
+        ).data
 
     def to_internal_value(self, data: T) -> T:
         return data
-

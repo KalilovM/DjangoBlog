@@ -22,10 +22,10 @@ class PathAndRename(object):
         self.path = sub_path
 
     def __call__(self, instance: Any, filename: str) -> str:
-        """ Return path to the renamed file """
+        """Return path to the renamed file"""
 
-        ext = filename.split('.')[-1]
-        filename = f'{uuid4().hex}.{ext}'
+        ext = filename.split(".")[-1]
+        filename = f"{uuid4().hex}.{ext}"
         return os.path.join(self.path, filename)
 
 
@@ -38,9 +38,13 @@ def run_images_validators(images: Collection) -> None:
         return
 
     if len(images) > 10:
-        raise serializers.ValidationError(detail={
-            'max_file_legth': _("Не допустимое количество файлов, Максимальное кол-во файлов: 10")
-        })
+        raise serializers.ValidationError(
+            detail={
+                "max_file_legth": _(
+                    "Не допустимое количество файлов, Максимальное кол-во файлов: 10"
+                )
+            }
+        )
 
     images_validator(images, 8)
 
@@ -51,14 +55,14 @@ def images_validator(images: Iterable, sizeImg: int) -> None:
     """
 
     img_validator = ImageFieldValidator().to_python
-    #TODO error occured when trying to validate image
-    #bytes couldn't operate with int or 
+    # TODO error occured when trying to validate image
+    # bytes couldn't operate with int or
     #    "non_field_errors": [
     #    "Ни одного файла не было отправлено. Проверьте тип кодировки формы."
     for image in images:
-        print(ContentFile(image).size )
+        print(ContentFile(image).size)
         if ContentFile(image).size / 1024 / 1024 > sizeImg:
-            raise serializers.ValidationError({
-                'file_too_large': _("Файл который вы загрузили слишком большой")
-            })
+            raise serializers.ValidationError(
+                {"file_too_large": _("Файл который вы загрузили слишком большой")}
+            )
         img_validator(image)

@@ -25,17 +25,21 @@ class PostSerializer(serializers.ModelSerializer, ErrorMessagesSerializerMixin):
     author = CurrentAuthorField(default=serializers.CurrentUserDefault())
 
     default_error_messages = {
-        'empty_post': _('Пустой пост'),
-        'image_size_not_valid': _('Изображение слишком большое'),
-        'image_dimension_not_valid': _("Размер изображения не подходит")
+        "empty_post": _("Пустой пост"),
+        "image_size_not_valid": _("Изображение слишком большое"),
+        "image_dimension_not_valid": _("Размер изображения не подходит"),
     }
 
     def validate(self, attrs: dict) -> None:
-        request = self.context.get('request')
-        cover, title, content = attrs.get('cover'), attrs.get('title'), attrs.get('content')
+        request = self.context.get("request")
+        cover, title, content = (
+            attrs.get("cover"),
+            attrs.get("title"),
+            attrs.get("content"),
+        )
 
         if not any((cover, title, content)):
-            self.fail('empty_post')
+            self.fail("empty_post")
 
         # images_validator(cover, 1)
         # TODO Make image validator by size, width and height
@@ -71,8 +75,17 @@ class PostSerializer(serializers.ModelSerializer, ErrorMessagesSerializerMixin):
     class Meta:
         model = Post
         fields = [
-            'id', 'title', 'content', 'created_at', 'updated_at', 'author', 'views_count', 'liked_count',
-            'author_is_user_following', 'is_user_liked_post','cover'
+            "id",
+            "title",
+            "content",
+            "created_at",
+            "updated_at",
+            "author",
+            "views_count",
+            "liked_count",
+            "author_is_user_following",
+            "is_user_liked_post",
+            "cover",
         ]
 
 
@@ -85,10 +98,10 @@ class CommentSerializer(serializers.ModelSerializer, ErrorMessagesSerializerMixi
     children = serializers.SerializerMethodField()
 
     default_error_messages = {
-        'empty_comment': _("Пустой комментарий"),
-        'parent_comment_reference_to_other_post': {
-            'parent': _("Родительский комментарий оставлен другим пользователем")
-        }
+        "empty_comment": _("Пустой комментарий"),
+        "parent_comment_reference_to_other_post": {
+            "parent": _("Родительский комментарий оставлен другим пользователем")
+        },
     }
 
     def get_grandchildren(self, childrens: Collection[MPTTModel]) -> list:
@@ -129,23 +142,29 @@ class CommentSerializer(serializers.ModelSerializer, ErrorMessagesSerializerMixi
         get the children up to the second level (see get_grandchildren)
         """
 
-        if not (obj.level == 0 and not self.context.get('not_children')):
+        if not (obj.level == 0 and not self.context.get("not_children")):
             return
         children = obj.get_children()[:2]
         descendants = self.get_grandchildren(children)
         return self.__class__(descendants, manu=True, context=self.context).data
 
     def validate(self, attrs: dict) -> None:
-        request = self.context.get('request')
+        request = self.context.get("request")
         # images, body = request.FILES.getlist('images'), attrs.get('body')
-        parent, body, post_id = attrs.get('parent'), attrs.get('body'), attrs.get('post').id
+        parent, body, post_id = (
+            attrs.get("parent"),
+            attrs.get("body"),
+            attrs.get("post").id,
+        )
 
         if not any(body):
-            self.fail('empty_comment')
+            self.fail("empty_comment")
 
         if parent:
-            if not Comment.objects.filter(id=parent.id, post=post_id, is_active=True).exists():
-                self.fail('parent_comment_reference_to_other_post')
+            if not Comment.objects.filter(
+                id=parent.id, post=post_id, is_active=True
+            ).exists():
+                self.fail("parent_comment_reference_to_other_post")
 
         # run_images_validators(images)
 
@@ -157,17 +176,22 @@ class CommentSerializer(serializers.ModelSerializer, ErrorMessagesSerializerMixi
     class Meta:
         model = Comment
         fields = [
-            'id', 'post', 'created_at', 'updated_at', 'parent', 'body', 'is_user_liked_comment', 'children',
-            'like_count', 'author'
+            "id",
+            "post",
+            "created_at",
+            "updated_at",
+            "parent",
+            "body",
+            "is_user_liked_comment",
+            "children",
+            "like_count",
+            "author",
         ]
-        extra_kwargs = {
-            'body': {'required': False}
-        }
+        extra_kwargs = {"body": {"required": False}}
 
 
 class CommentUpdateSerializer(serializers.ModelSerializer):
     parent = serializers.PrimaryKeyRelatedField(read_only=True)
 
-    def update(self, instance: Comment, validated_data:dict) -> Comment:
+    def update(self, instance: Comment, validated_data: dict) -> Comment:
         return super().update(instance, validated_data)
-

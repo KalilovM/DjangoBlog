@@ -12,23 +12,26 @@ from mptt.models import MPTTModel
 
 # TODO read about type of the methods to make some methods static or class method
 
+
 class CourseSerializer(serializers.ModelSerializer, ErrorMessagesSerializerMixin):
     viewers_count = serializers.IntegerField(read_only=True)
     liked_count = serializers.IntegerField(read_only=True)
     author = CurrentAuthorField(default=serializers.CurrentUserDefault)
     is_user_liked_post = serializers.BooleanField(read_only=True)
 
-    default_error_messages = {
-        'empty_course': _("Пустой курс")
-    }
+    default_error_messages = {"empty_course": _("Пустой курс")}
 
     def validate(self, attrs: dict) -> None:
         request = self.context.get("request")
-        cover, title, description, level = request.FILES.get('cover'), attrs.get('title'), attrs.get(
-            'description'), attrs.get('level')
+        cover, title, description, level = (
+            request.FILES.get("cover"),
+            attrs.get("title"),
+            attrs.get("description"),
+            attrs.get("level"),
+        )
 
         if not any((cover, title, description, level)):
-            self.fail('empty_course')
+            self.fail("empty_course")
 
         run_images_validators(cover)
 
@@ -51,7 +54,14 @@ class CourseSerializer(serializers.ModelSerializer, ErrorMessagesSerializerMixin
     class Meta:
         model = Course
         fields = [
-            'id', 'title', 'content', 'created_at', 'updated_at', 'author', 'viewers_count', 'liked_count',
+            "id",
+            "title",
+            "content",
+            "created_at",
+            "updated_at",
+            "author",
+            "viewers_count",
+            "liked_count",
         ]
 
 
@@ -62,10 +72,10 @@ class CommentSerializer(serializers.ModelSerializer, ErrorMessagesSerializerMixi
     children = serializers.SerializerMethodField(read_only=True)
 
     default_error_messages = {
-        'empty_comment': _("Пустой коммент"),
-        'parent_reference_to_other': {
-            'parent': _("Родительский комментарий оставлен под другим постом")
-        }
+        "empty_comment": _("Пустой коммент"),
+        "parent_reference_to_other": {
+            "parent": _("Родительский комментарий оставлен под другим постом")
+        },
     }
 
     def get_grandchildren(self, childrens: Collection[MPTTModel]) -> list:
@@ -106,7 +116,7 @@ class CommentSerializer(serializers.ModelSerializer, ErrorMessagesSerializerMixi
         get the children up to the second level (see get_grandchildren).
         """
 
-        if not (obj.get_level() == 0 and not self.context.get('not_children')):
+        if not (obj.get_level() == 0 and not self.context.get("not_children")):
             return
 
         children = obj.get_children()[:2]
@@ -115,15 +125,21 @@ class CommentSerializer(serializers.ModelSerializer, ErrorMessagesSerializerMixi
         return self.__class__(descendants, many=True, context=self.context).data
 
     def validate(self, attrs: dict) -> None:
-        request = self.context.get('request')
-        content, parent, lesson_id = attrs.get('content'), attrs.get('parent'), attrs.get('lesson').id
+        request = self.context.get("request")
+        content, parent, lesson_id = (
+            attrs.get("content"),
+            attrs.get("parent"),
+            attrs.get("lesson").id,
+        )
 
         if not content:
-            self.fail('empty_comment')
+            self.fail("empty_comment")
 
         if parent:
-            if not Comment.objects.filter(id=parent.id, lesson_id=lesson_id, is_active=True).exists():
-                self.fail('parent_reference_to_other')
+            if not Comment.objects.filter(
+                id=parent.id, lesson_id=lesson_id, is_active=True
+            ).exists():
+                self.fail("parent_reference_to_other")
 
         return super().validate(attrs)
 
@@ -133,12 +149,18 @@ class CommentSerializer(serializers.ModelSerializer, ErrorMessagesSerializerMixi
     class Meta:
         model = Comment
         fields = [
-            "id", 'lesson', 'created_at', 'updated_at', 'parent', 'content', 'is_user_liked_comment', 'children',
-            'comment_liked_count', 'author'
+            "id",
+            "lesson",
+            "created_at",
+            "updated_at",
+            "parent",
+            "content",
+            "is_user_liked_comment",
+            "children",
+            "comment_liked_count",
+            "author",
         ]
-        extra_kwargs = {
-            'body': {'required': False}
-        }
+        extra_kwargs = {"body": {"required": False}}
 
 
 class CommentUpdateSerializer(serializers.ModelSerializer):
@@ -146,4 +168,3 @@ class CommentUpdateSerializer(serializers.ModelSerializer):
 
     def update(self, instance: Comment, validated_data: dict):
         return super().update(instance, validated_data)
-    

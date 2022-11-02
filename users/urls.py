@@ -1,6 +1,17 @@
 from django.urls import path
-from .views import UserRegisterAPIView
+from .views import ProfileViewset
 
 urlpatterns = [
-    path("login/", UserRegisterAPIView.as_view(), name="register"),
+    path(
+        "accounts/",
+        ProfileViewset.as_view({"get": "list", "post": "create"}),
+        name="register",
+    ),
+    path(
+        "accounts/<int:pk>",
+        ProfileViewset.as_view(
+            {"get": "retrieve", "delete": "destroy", "put": "update"}
+        ),
+        name="register",
+    ),
 ]
