@@ -1,4 +1,6 @@
 from django.shortcuts import render
+from rest_framework.response import Response
+
 from .models import Profile
 from .serializers import CreateProfileSerializer, ProfileSerializer
 from rest_framework import generics, permissions
@@ -31,3 +33,8 @@ class ProfileViewset(viewsets.ModelViewSet):
         if self.action == "create":
             serializer = CreateProfileSerializer
         return serializer
+
+    def retrieve(self, request, *args, **kwargs):
+        if kwargs.get('pk') == 'me':
+            return Response(self.get_serializer(request.user).data)
+        return super().retrieve(request, args, kwargs)

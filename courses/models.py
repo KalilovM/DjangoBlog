@@ -2,15 +2,15 @@ from django.db import models
 from users.models import Profile
 from django.urls import reverse
 from mptt.models import MPTTModel, TreeForeignKey
-from main.helpers import PathAndRename
+from posts.helpers import PathAndRename
 from datetime import datetime
 
 
 class Course(models.Model):
     levels = [
-        ("easy", "Easy"),
-        ("medium", "Medium"),
-        ("hard", "Hard"),
+        ("EASY", "Easy"),
+        ("MEDIUM", "Medium"),
+        ("HARD", "Hard"),
     ]
     cover = models.ImageField(
         upload_to=PathAndRename(
@@ -34,7 +34,7 @@ class Course(models.Model):
         Profile,
         related_name="courses",
         related_query_name="courses",
-        verbose_name="]Просмотры",
+        verbose_name="Просмотры",
     )
     liked = models.ManyToManyField(
         Profile,
@@ -63,10 +63,10 @@ class Course(models.Model):
 
 
 class Subscribe(models.Model):
-    course_to = models.ForeignKey(
+    course = models.ForeignKey(
         Course, on_delete=models.CASCADE, verbose_name="На", related_name="to_set_sub"
     )
-    user_from = models.ForeignKey(
+    user = models.ForeignKey(
         Profile,
         on_delete=models.CASCADE,
         verbose_name="От",
@@ -76,7 +76,7 @@ class Subscribe(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
 
     def __str__(self) -> str:
-        return f"{self.user_from} подписался на {self.course_to}"
+        return f"{self.user} подписался на {self.course}"
 
     class Meta:
         ordering = ["-created_at"]

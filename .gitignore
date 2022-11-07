@@ -1,8 +1,7 @@
-/photos/
 migrations/
 db.sqlite3
 /venv
-./photos/
+/avatars/
 post_cover/
 __pycache__/
 .vscode/

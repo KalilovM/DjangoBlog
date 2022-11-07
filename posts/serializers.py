@@ -4,7 +4,7 @@ from rest_framework.utils.serializer_helpers import ReturnDict
 from .models import Post, Comment
 from .fields import CurrentAuthorField
 from django.utils.translation import gettext as _
-from main.helpers import images_validator
+from posts.helpers import images_validator
 from typing import Iterable, Collection, Any
 from .mixins import ErrorMessagesSerializerMixin
 from mptt.models import MPTTModel

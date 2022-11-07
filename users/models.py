@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
-from main.helpers import PathAndRename
+from posts.helpers import PathAndRename
 from datetime import datetime
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
@@ -32,6 +32,21 @@ class Profile(AbstractUser):
     telegram = models.CharField(max_length=100, null=True, blank=True)
 
     REQUIRED_FIELDS: List[str] = ["first_name", "last_name", "password"]
+
+    def get_image(self):
+        if not self.avatar:
+            self.avatar = f"photos/defaults/{self.first_name[0].upper()}{self.last_name[0].upper()}.svg"
+
+    def save(self, *args, **kwargs):
+        self.get_image()
+        super().save(*args, **kwargs)
+
+
+
+    # TODO read about it
+    def validate_unique(self, exclude=None, *args, **kwargs):
+        self.get_image()
+        super().validate_unique(*args, **kwargs)
 
     def __str__(self):
         return self.username

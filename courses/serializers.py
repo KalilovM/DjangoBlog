@@ -1,9 +1,9 @@
 from rest_framework import serializers
 from rest_framework.utils.serializer_helpers import ReturnDict
-from main.fields import CurrentAuthorField
+from posts.fields import CurrentAuthorField
 from django.utils.translation import gettext as _
-from main.mixins import ErrorMessagesSerializerMixin
-from main.helpers import run_images_validators
+from posts.mixins import ErrorMessagesSerializerMixin
+from posts.helpers import run_images_validators
 from PIL import Image
 from .models import Course, Comment
 from typing import Collection

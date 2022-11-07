@@ -9,7 +9,7 @@ from typing import Union, OrderedDict
 from dateutil.relativedelta import relativedelta
 
 # The dateutil module provides powerful extensions to the standard datetime module, available in Python.
-from main.mixins import ErrorMessagesSerializerMixin
+from posts.mixins import ErrorMessagesSerializerMixin
 from django.contrib.auth.models import User
 from django.contrib.auth.password_validation import validate_password
 import re  # Regular expressions
@@ -117,7 +117,6 @@ class ProfileSerializer(serializers.ModelSerializer):
             "username",
             "first_name",
             "last_name",
-            "password",
             "followers",
             "is_active",
             "avatar",

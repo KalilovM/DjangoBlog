@@ -28,13 +28,16 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "rest_framework",
     "mptt",
+    "corsheaders",
     "django_filters",
-    "djoser",
-    "main.apps.MainConfig",
+
+    "posts.apps.MainConfig",
     "users.apps.UsersConfig",
     "courses.apps.CoursesConfig",
     "components.apps.ComponentsConfig",
 ]
+
+CORS_ALLOWED_ORIGINS = ['http://localhost:3000']
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -44,24 +47,17 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
 ]
 
 REST_FRAMEWORK = {
-    # 'DEFAULT_AUTHENTICATION_CLASSES': [
-    #     'rest_framework_simplejwt.authentication.JWTAuthentication',
-    # ],
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ],
     "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAuthenticated"],
 }
 
-djoser = {
-    "SERIALIZERS": {
-        "user_create": "users.serializers.CreateProfileSerializer",
-        "user": "users.serializers.CreateProfileSerializer",
-        "current_user": "users.serializers.CreateProfileSerializer",
-        "user_delete": "djoser.serializers.UserDeleteSerializer",
-    }
-}
-
+CSRF_COOKIE_SECURE = True
 
 AUTH_USER_MODEL = "users.Profile"
 ROOT_URLCONF = "core.urls"
