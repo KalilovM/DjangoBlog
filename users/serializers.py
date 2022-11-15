@@ -15,6 +15,7 @@ from django.contrib.auth.password_validation import validate_password
 import re  # Regular expressions
 from django.db.utils import IntegrityError
 from django.utils import timezone
+from django.contrib.auth.hashers import make_password
 
 
 class CreateProfileSerializer(
@@ -29,8 +30,6 @@ class CreateProfileSerializer(
             "invalid_message",
             _("Файл который вы загрузили, поврежден или не является изображением"),
         ),
-        "age_under_fourteen": _("Вам меньше 14 лет"),
-        "age_more_than_hundred": _("Вы не можете указать возраст больше 100"),
         "cannot_create_user": _(
             "Не получилось создать пользователя, попробуйте снова."
         ),
@@ -51,17 +50,6 @@ class CreateProfileSerializer(
             "invalid"
         ] = self.default_error_messages.get("invalid_image")
 
-    def validate_birthday(self, value: date) -> Union[date, None]:
-        today = timezone.now()
-
-        if relativedelta(today, value).years < 14:
-            self.fail("age_under_fourteen")
-
-        if relativedelta(today, value).years > 100:
-            self.fail("age_more_than_hundred")
-
-        return value
-
     def validate_names(self, username: str, first_name: str, last_name: str) -> None:
         if username.isdigit():
             self.fail("username_contains_only_digits")
@@ -70,12 +58,17 @@ class CreateProfileSerializer(
         if re.search(r"\d", last_name):
             self.fail("last_name_contains_digits")
 
+    def validate_password(self, value: str) -> str:
+        return make_password(value)
+
     def validate(self, attrs):
-        username, first_name, last_name = (
+        username, first_name, last_name, password = (
             attrs.get("username"),
             attrs.get("first_name"),
             attrs.get("last_name"),
+            attrs.get("password")
         )
+        self.validate_password(password)
         self.validate_names(username, first_name, last_name)
         return super().validate(attrs)
 
@@ -89,10 +82,8 @@ class CreateProfileSerializer(
             "password",
             "is_active",
             "avatar",
-            "birthday",
         ]
         extra_kwargs = {
-            "birthday": {"required": True, "allow_null": False},
             "password": {"write_only": True, "validators": [validate_password]},
             "is_active": {"read_only": True},
             "username": {"max_length": 50, "min_length": 4},
@@ -120,5 +111,4 @@ class ProfileSerializer(serializers.ModelSerializer):
             "followers",
             "is_active",
             "avatar",
-            "birthday",
         ]

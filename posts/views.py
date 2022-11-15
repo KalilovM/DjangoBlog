@@ -1,3 +1,5 @@
+from django.core.files.storage import FileSystemStorage
+from rest_framework.views import APIView
 from core.helpers import PartialViewSet, RetrievePartialDestroyAPIView
 from .mixins import IsAuthorPermissionsMixin, CacheTreeQuerysetMixin
 from .serializers import PostSerializer, CommentSerializer, CommentUpdateSerializer
@@ -14,6 +16,7 @@ from rest_framework.generics import (
 )
 from rest_framework.exceptions import ValidationError
 from rest_framework.serializers import SerializerMetaclass
+from rest_framework import permissions, status
 
 
 class PostViewSet(PartialViewSet, IsAuthorPermissionsMixin):
@@ -182,8 +185,8 @@ class CommentDetailAPIView(IsAuthorPermissionsMixin, RetrievePartialDestroyAPIVi
         (Eg. admins get full serialization, others get basic serialization)
         """
         assert self.serializer_class is not None, (
-            "'%s' should either include a `serializer_class` attribute, "
-            "or override the `get_serializer_class()` method." % self.__class__.__name__
+                "'%s' should either include a `serializer_class` attribute, "
+                "or override the `get_serializer_class()` method." % self.__class__.__name__
         )
 
         if self.request.method == "PATCH":
@@ -194,3 +197,28 @@ class CommentDetailAPIView(IsAuthorPermissionsMixin, RetrievePartialDestroyAPIVi
 
 class CommentCreateAPIView(CreateAPIView):
     serializer_class = CommentSerializer
+
+
+class ImageUploadAPI(APIView):
+    permission_classes = (permissions.AllowAny,)
+
+    def post(self, request, *args, **kwargs):
+        try:
+            image = request.FILES['photo']
+            fs = FileSystemStorage()
+            file = fs.save(image, image)
+            fileurl = fs.url(file)
+            return Response({'success': 1, 'file': {'url': f'http://localhost:8000{fileurl}'}})
+        except:
+            return Response({'success': 0})
+
+
+class ImageDeleteAPI(APIView):
+    permission_classes = (permissions.AllowAny,)
+
+    def delete(self, request, *args, **kwargs):
+        image = request.data['photo']
+        fs = FileSystemStorage()
+        for i in image:
+            fs.delete(i)
+        return Response(status=status.HTTP_204_NO_CONTENT)

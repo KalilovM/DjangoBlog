@@ -1,5 +1,7 @@
 from django.urls import path
 from .views import (
+    ImageUploadAPI,
+    ImageDeleteAPI,
     PostViewSet,
     CommentAPIView,
     CommentDescendantsAPIView,
@@ -40,4 +42,7 @@ urlpatterns = [
     ),
     path("comments/<int:pk>", CommentDetailAPIView.as_view(), name="comment_detail"),
     path("comments/create/", CommentCreateAPIView.as_view(), name="comment_create"),
+    path("image/", ImageUploadAPI.as_view(), name="image_upload"),
+    path("image/delete/", ImageDeleteAPI.as_view(), name="image_delete")
+
 ]

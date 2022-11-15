@@ -10,13 +10,6 @@ from .mixins import ErrorMessagesSerializerMixin
 from mptt.models import MPTTModel
 
 
-# TODO ADD IMAGES TO COURSES
-# class ImageSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Image
-#         fields = ['photo']
-
-
 class PostSerializer(serializers.ModelSerializer, ErrorMessagesSerializerMixin):
     views_count = serializers.IntegerField(read_only=True)
     liked_count = serializers.IntegerField(read_only=True)
@@ -162,7 +155,7 @@ class CommentSerializer(serializers.ModelSerializer, ErrorMessagesSerializerMixi
 
         if parent:
             if not Comment.objects.filter(
-                id=parent.id, post=post_id, is_active=True
+                    id=parent.id, post=post_id, is_active=True
             ).exists():
                 self.fail("parent_comment_reference_to_other_post")
 

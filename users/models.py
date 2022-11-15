@@ -27,7 +27,6 @@ class Profile(AbstractUser):
     followers = models.ManyToManyField(
         "self", through="Contact", related_name="following", symmetrical=False
     )
-    birthday = models.DateTimeField(verbose_name="День рождения", null=True)
     github = models.CharField(max_length=100, null=True, blank=True)
     telegram = models.CharField(max_length=100, null=True, blank=True)
 
@@ -40,8 +39,6 @@ class Profile(AbstractUser):
     def save(self, *args, **kwargs):
         self.get_image()
         super().save(*args, **kwargs)
-
-
 
     # TODO read about it
     def validate_unique(self, exclude=None, *args, **kwargs):

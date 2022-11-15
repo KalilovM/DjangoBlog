@@ -1,4 +1,3 @@
-from django.shortcuts import render
 from rest_framework.response import Response
 
 from .models import Profile
@@ -35,6 +34,6 @@ class ProfileViewset(viewsets.ModelViewSet):
         return serializer
 
     def retrieve(self, request, *args, **kwargs):
-        if kwargs.get('pk') == 'me':
+        if kwargs.get("pk") == "me":
             return Response(self.get_serializer(request.user).data)
         return super().retrieve(request, args, kwargs)
