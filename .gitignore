@@ -1,7 +1,9 @@
 migrations/
 db.sqlite3
 /venv
-/avatars/
+photos/avatars
 post_cover/
 __pycache__/
 .vscode/
+media
+staticfiles/
