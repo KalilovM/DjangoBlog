@@ -25,6 +25,7 @@ from mptt.fields import TreeForeignKey
 class Post(models.Model):
     title = models.CharField(max_length=150, verbose_name="Названия", blank=True)
     content = models.JSONField(verbose_name="Контент", blank=True)
+    short_content = models.TextField(verbose_name="Короткое описание")
     cover = models.ImageField(
         upload_to=PathAndRename(
             f"post_cover/{datetime.now().year}/{datetime.now().month}/"
@@ -55,7 +56,7 @@ class Post(models.Model):
     )
 
     def __str__(self) -> str:
-        return self.title or self.content[:10] or self.author.username
+        return self.title or self.author.username
 
     def get_absolute_url(self) -> str:
         return reverse("post", kwargs={"pk": self.pk})

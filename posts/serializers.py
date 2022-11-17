@@ -25,12 +25,12 @@ class PostSerializer(serializers.ModelSerializer, ErrorMessagesSerializerMixin):
 
     def validate(self, attrs: dict) -> None:
         request = self.context.get("request")
-        cover, title, content = (
+        cover, title, content, short_content = (
             attrs.get("cover"),
             attrs.get("title"),
             attrs.get("content"),
+            attrs.get("short_content"),
         )
-
         if not any((cover, title, content)):
             self.fail("empty_post")
 
@@ -71,6 +71,7 @@ class PostSerializer(serializers.ModelSerializer, ErrorMessagesSerializerMixin):
             "id",
             "title",
             "content",
+            "short_content",
             "created_at",
             "updated_at",
             "author",
