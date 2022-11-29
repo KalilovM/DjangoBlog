@@ -14,13 +14,12 @@ class ProfileViewset(viewsets.ModelViewSet):
         queryset = Profile.objects.prefetch_related("followers")
         if self.action == "create":
             queryset = Profile.objects.all()
+        if self.action == "retrieve":
+            queryset = Profile.objects.all().annotate(posts="profile__author_post")
         return queryset
 
     def get_permissions(self):
-        permission_classes = (
-            permissions.IsAuthenticatedOrReadOnly,
-            permissions.IsAdminUser,
-        )
+        permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
         if self.action == "list":
             permission_classes = (permissions.AllowAny,)
         elif self.action == "create":
@@ -35,5 +34,7 @@ class ProfileViewset(viewsets.ModelViewSet):
 
     def retrieve(self, request, *args, **kwargs):
         if kwargs.get("pk") == "me":
-            return Response(self.get_serializer(request.user).data)
+            return Response(
+                self.get_serializer(request.user, context={"request": request}).data
+            )
         return super().retrieve(request, args, kwargs)

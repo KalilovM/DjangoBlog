@@ -56,7 +56,7 @@ class Post(models.Model):
     )
 
     def __str__(self) -> str:
-        return self.title or self.author.username
+        return self.title
 
     def get_absolute_url(self) -> str:
         return reverse("post", kwargs={"pk": self.pk})
@@ -65,6 +65,17 @@ class Post(models.Model):
         """Adds a view to the post, or if there is already a view, does nothing"""
 
         self.viewers.add(user)
+
+    def like(self, user: Profile):
+        """Like/dislike post, returns True if like false otherwise"""
+
+        is_like = self.liked.filter(id=user.id).exists()
+        if is_like:
+            self.liked.remove(user)
+            return False
+
+        self.liked.add(user)
+        return True
 
     class Meta:
         verbose_name = "Пост"
@@ -109,6 +120,17 @@ class Comment(MPTTModel):
 
     def __str__(self):
         return f"Комментарий {self.pk}"
+
+    def like(self, user: Profile):
+        """Like/dislike post, returns True if like false otherwise"""
+
+        is_like = self.liked.filter(id=user.id).exists()
+        if is_like:
+            self.liked.remove(user)
+            return False
+
+        self.liked.add(user)
+        return True
 
     class Meta:
         verbose_name = "Комментарий"

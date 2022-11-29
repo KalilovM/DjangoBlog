@@ -156,7 +156,7 @@ class CommentSerializer(serializers.ModelSerializer, ErrorMessagesSerializerMixi
 
         if parent:
             if not Comment.objects.filter(
-                    id=parent.id, post=post_id, is_active=True
+                id=parent.id, post=post_id, is_active=True
             ).exists():
                 self.fail("parent_comment_reference_to_other_post")
 
@@ -189,3 +189,23 @@ class CommentUpdateSerializer(serializers.ModelSerializer):
 
     def update(self, instance: Comment, validated_data: dict) -> Comment:
         return super().update(instance, validated_data)
+
+
+class PostLikeSerializer(serializers.Serializer):
+    """
+    The serializer that accepts the ID of the post, and checks whether such an ID exists
+
+    Is used for likes
+    """
+
+    post = serializers.PrimaryKeyRelatedField(queryset=Post.objects.all())
+
+
+class CommentLikeSerializer(serializers.Serializer):
+    """
+    The serializer that accepts the ID of the comment, and checks whether such an ID exists
+
+    Is used for likes
+    """
+
+    comment = serializers.PrimaryKeyRelatedField(queryset=Comment.objects.all())

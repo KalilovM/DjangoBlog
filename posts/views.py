@@ -2,7 +2,13 @@ from django.core.files.storage import FileSystemStorage
 from rest_framework.views import APIView
 from core.helpers import PartialViewSet, RetrievePartialDestroyAPIView
 from .mixins import IsAuthorPermissionsMixin, CacheTreeQuerysetMixin
-from .serializers import PostSerializer, CommentSerializer, CommentUpdateSerializer
+from .serializers import (
+    CommentLikeSerializer,
+    PostLikeSerializer,
+    PostSerializer,
+    CommentSerializer,
+    CommentUpdateSerializer,
+)
 from .filters import filters, PostFilter
 from rest_framework.response import Response
 from django.utils.translation import gettext as _
@@ -14,6 +20,7 @@ from rest_framework.generics import (
     Http404,
     CreateAPIView,
 )
+from .generics import LikeGenericApi
 from rest_framework.exceptions import ValidationError
 from rest_framework.serializers import SerializerMetaclass
 from rest_framework import permissions, status
@@ -185,8 +192,8 @@ class CommentDetailAPIView(IsAuthorPermissionsMixin, RetrievePartialDestroyAPIVi
         (Eg. admins get full serialization, others get basic serialization)
         """
         assert self.serializer_class is not None, (
-                "'%s' should either include a `serializer_class` attribute, "
-                "or override the `get_serializer_class()` method." % self.__class__.__name__
+            "'%s' should either include a `serializer_class` attribute, "
+            "or override the `get_serializer_class()` method." % self.__class__.__name__
         )
 
         if self.request.method == "PATCH":
@@ -200,25 +207,55 @@ class CommentCreateAPIView(CreateAPIView):
 
 
 class ImageUploadAPI(APIView):
+    """
+    Upload images from frontend and add them to media path
+    """
+
     permission_classes = (permissions.AllowAny,)
 
     def post(self, request, *args, **kwargs):
         try:
-            image = request.FILES['photo']
+            image = request.FILES["photo"]
             fs = FileSystemStorage()
             file = fs.save(image, image)
             fileurl = fs.url(file)
-            return Response({'success': 1, 'file': {'url': f'http://localhost:8000{fileurl}'}})
+            return Response(
+                {"success": 1, "file": {"url": f"http://localhost:8000{fileurl}"}}
+            )
         except:
-            return Response({'success': 0})
+            return Response({"success": 0})
 
 
 class ImageDeleteAPI(APIView):
+    """
+    Delete images from media path
+    """
+
     permission_classes = (permissions.AllowAny,)
 
     def delete(self, request, *args, **kwargs):
-        image = request.data['photo']
+        image = request.data["photo"]
         fs = FileSystemStorage()
         for i in image:
             fs.delete(i)
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class PostLikeAPIView(LikeGenericApi):
+    """
+    Like/Dislike the post
+    """
+
+    instance_name = "post"
+    serializer_class = PostLikeSerializer
+    lookup_method = "like"
+
+
+class CommentLikeAPIView(LikeGenericApi):
+    """
+    Like/Dislike the comment
+    """
+
+    instance_name = "comment"
+    serializer_class = CommentLikeSerializer
+    lookup_method = "like"

@@ -1,7 +1,9 @@
 from django.urls import path
 from .views import (
+    CommentLikeAPIView,
     ImageUploadAPI,
     ImageDeleteAPI,
+    PostLikeAPIView,
     PostViewSet,
     CommentAPIView,
     CommentDescendantsAPIView,
@@ -43,6 +45,7 @@ urlpatterns = [
     path("comments/<int:pk>", CommentDetailAPIView.as_view(), name="comment_detail"),
     path("comments/create/", CommentCreateAPIView.as_view(), name="comment_create"),
     path("image/", ImageUploadAPI.as_view(), name="image_upload"),
-    path("image/delete/", ImageDeleteAPI.as_view(), name="image_delete")
-
+    path("image/delete/", ImageDeleteAPI.as_view(), name="image_delete"),
+    path("like/", PostLikeAPIView.as_view(), name="like"),
+    path("like-comment", CommentLikeAPIView.as_view(), name="like_comment"),
 ]

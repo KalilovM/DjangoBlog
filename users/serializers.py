@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import Profile
+from posts.serializers import PostSerializer
 
 # To check firstly file then image
 from drf_extra_fields.fields import HybridImageField
@@ -66,7 +67,7 @@ class CreateProfileSerializer(
             attrs.get("username"),
             attrs.get("first_name"),
             attrs.get("last_name"),
-            attrs.get("password")
+            attrs.get("password"),
         )
         self.validate_password(password)
         self.validate_names(username, first_name, last_name)
@@ -100,6 +101,7 @@ class FollowerSerializer(serializers.ModelSerializer):
 
 class ProfileSerializer(serializers.ModelSerializer):
     followers = FollowerSerializer(read_only=True, many=True)
+    posts = PostSerializer(read_only=True, many=True)
 
     class Meta:
         model = Profile
@@ -111,4 +113,5 @@ class ProfileSerializer(serializers.ModelSerializer):
             "followers",
             "is_active",
             "avatar",
+            "posts",
         ]
