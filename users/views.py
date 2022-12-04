@@ -1,40 +1,9 @@
-from rest_framework.response import Response
+from rest_framework import mixins
+from rest_framework.viewsets import GenericViewSet
 
-from .models import Profile
-from .serializers import CreateProfileSerializer, ProfileSerializer
-from rest_framework import generics, permissions
-from .permissions import IsAnonymous
-from rest_framework import viewsets
+from users.models import User
+from users.serializers import UserSerializer
 
-
-class ProfileViewset(viewsets.ModelViewSet):
-    """View set of profiles to CRUD"""
-
-    def get_queryset(self):
-        queryset = Profile.objects.prefetch_related("followers")
-        if self.action == "create":
-            queryset = Profile.objects.all()
-        if self.action == "retrieve":
-            queryset = Profile.objects.all().annotate(posts="profile__author_post")
-        return queryset
-
-    def get_permissions(self):
-        permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
-        if self.action == "list":
-            permission_classes = (permissions.AllowAny,)
-        elif self.action == "create":
-            permission_classes = (IsAnonymous,)
-        return [permission() for permission in permission_classes]
-
-    def get_serializer_class(self):
-        serializer = ProfileSerializer
-        if self.action == "create":
-            serializer = CreateProfileSerializer
-        return serializer
-
-    def retrieve(self, request, *args, **kwargs):
-        if kwargs.get("pk") == "me":
-            return Response(
-                self.get_serializer(request.user, context={"request": request}).data
-            )
-        return super().retrieve(request, args, kwargs)
+class UserViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.CreateModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin, GenericViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer

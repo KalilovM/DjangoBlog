@@ -1,24 +1,19 @@
-from rest_framework.viewsets import ModelViewSet
-from rest_framework.generics import RetrieveUpdateDestroyAPIView
+import os
+from typing import Any
+import uuid
+from django.utils.deconstruct import deconstructible
 
 
-class PartialViewSet(ModelViewSet):
-    """
-    Viewset where put requests not allowed
-    """
+@deconstructible
+class PathAndRename:
+   """
+   Class to rename given file into uuid4
+   """ 
+   def __init__(self, sub_path:str) -> None:
+        self.path = sub_path
 
-    http_method_names = ["get", "post", "patch", "delete", "options"]
-
-    def put(self, request, *args, **kwargs) -> None:
-        self.http_method_not_allowed()
-
-
-class RetrievePartialDestroyAPIView(RetrieveUpdateDestroyAPIView):
-    """
-    Api where put method not allowed
-    """
-
-    http_method_names = ["get", "post", "patch", "delete", "options"]
-
-    def put(self, request, *args, **kwargs) -> None:
-        self.http_method_not_allowed()
+   def __call__(self, instance:Any, filename: str) -> str:
+        file_ext = filename.split(".")[-1]
+        filename = f"{uuid.uuid4().hex}.{file_ext}"
+        print(instance)
+        return os.path.join(self.path, filename)

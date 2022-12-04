@@ -27,15 +27,12 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-
     "rest_framework",
     "mptt",
     "corsheaders",
     "django_filters",
-
     "posts.apps.MainConfig",
     "users.apps.UsersConfig",
-    "courses.apps.CoursesConfig",
 ]
 
 CORS_ALLOWED_ORIGINS = ["http://localhost:3000"]
@@ -132,7 +129,6 @@ STATIC_ROOT = os.path.join(BASE_DIR / "staticfiles/")
 
 MEDIA_URL = "media/"
 MEDIA_ROOT = os.path.join(BASE_DIR / "media/")
-CKEDITOR_UPLOAD_PATH = "posts_ckeditor/"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
@@ -141,7 +137,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
 DEFAULTS = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=5),
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=50),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
     "ROTATE_REFRESH_TOKENS": False,
     "BLACKLIST_AFTER_ROTATION": True,
