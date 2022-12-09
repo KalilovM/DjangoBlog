@@ -1,6 +1,7 @@
 import os.path
 from datetime import timedelta
 from pathlib import Path
+from typing import List
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -15,7 +16,7 @@ SECRET_KEY = "django-insecure-03kh@mx-kila1q4zm=wtq()(nrz4=(ic$r9ya^&g+q$lk%y$1u
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS: List[str] = []
 
 
 # Application definition
@@ -31,7 +32,6 @@ INSTALLED_APPS = [
     "mptt",
     "corsheaders",
     "django_filters",
-    "posts.apps.MainConfig",
     "users.apps.UsersConfig",
 ]
 
@@ -57,7 +57,7 @@ REST_FRAMEWORK = {
 
 CSRF_COOKIE_SECURE = True
 
-AUTH_USER_MODEL = "users.Profile"
+# AUTH_USER_MODEL = "users.Profile"
 ROOT_URLCONF = "core.urls"
 
 TEMPLATES = [
