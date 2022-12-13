@@ -1,2 +1,4 @@
-from rest_framework import routers
+from .routers import router
 
+
+urlpatterns = router.urls

@@ -1,15 +1,12 @@
 from django.db import models
-from django.contrib.auth.models import AbstractUser
-
-from core.helpers import PathAndRename
-
-
-class User(AbstractUser):
-    avatar = models.ImageField(upload_to=PathAndRename("profile/"), verbose_name="Profile photo")
-    bio = models.TextField(verbose_name="About me")
+from django.contrib.auth.models import User
 
 
 class Links(models.Model):
+    """
+    Social links model for user
+    """
+
     SOCIAL = (("GH", "GitHub"), ("TG", "Telegram"))
 
     network = models.CharField(
