@@ -11,6 +11,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
+# TODO add config file
 SECRET_KEY = "django-insecure-03kh@mx-kila1q4zm=wtq()(nrz4=(ic$r9ya^&g+q$lk%y$1u"
 
 # SECURITY WARNING: don't run with debug turned on in production!
@@ -28,11 +29,18 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    # # # # # # # # # # # # # # # # # #
+    # Third party apps# # # # # # # # #
+    # # # # # # # # # # # # # # # # # #
     "rest_framework",
     "mptt",
     "corsheaders",
     "django_filters",
+    # # # # # # # # # # # # # # # # # #
+    # Local apps# # # # # # # # # # # #
+    # # # # # # # # # # # # # # # # # #
     "users.apps.UsersConfig",
+    "posts.apps.PostsConfig",
 ]
 
 CORS_ALLOWED_ORIGINS = ["http://localhost:3000"]
