@@ -1,11 +1,22 @@
+from rest_framework.test import APIClient
+from test_users.factories import UserFactory
 import pytest
-from pytest_factoryboy import register
-from tests.test_user.factories import UserFactory
-
-register(UserFactory)
 
 
 @pytest.fixture
-def new_user(db, user_factory: UserFactory):
-    user = user_factory.build()
-    return user
+def client():
+    """
+    Client fixture for requests
+    """
+    return APIClient()
+
+
+@pytest.fixture
+def user_client(client: APIClient) -> APIClient:
+    """
+    User fixture
+    Returns client with user authenticated via tokens
+    """
+    user = UserFactory()
+
+    return client
