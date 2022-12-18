@@ -1,8 +1,8 @@
 from rest_framework import mixins, permissions
 from rest_framework.viewsets import GenericViewSet
 
-from users.serializers import UserSerializer
-from django.contrib.auth.models import User
+from .serializer_fields import CurrentUserSerializer
+from users.models import User
 
 
 class UserViewSet(
@@ -16,7 +16,7 @@ class UserViewSet(
     """
 
     queryset = User.objects.all()
-    serializer_class = UserSerializer
+    serializer_class = CurrentUserSerializer
     permission_classes = [permissions.AllowAny]
 
 
@@ -32,7 +32,7 @@ class ProfileViewSet(
     """
 
     queryset = User.objects.all()
-    serializer_class = UserSerializer
+    serializer_class = CurrentUserSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get_object(self):

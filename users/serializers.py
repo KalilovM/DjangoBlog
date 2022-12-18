@@ -1,10 +1,14 @@
 from rest_framework import serializers
-from django.contrib.auth.models import User
+from .models import Links
 
 
-class UserSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True)
+class LinkSerializer(serializers.Serializer):
+    """
+    Link serializer
+    """
+
+    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
 
     class Meta:
-        model = User
-        fields = ["id", "username", "email", "last_name", "first_name", "password"]
+        model = Links
+        fields = ["network", "contact"]

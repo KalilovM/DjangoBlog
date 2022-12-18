@@ -16,7 +16,7 @@ urlpatterns = [
     path(
         "login/",
         TokenObtainPairView.as_view(),  # type: ignore
-        name="TokenObtainPairView",
+        name="token-get",
     ),
-    path("refresh/", TokenRefreshView.as_view(), name="TokenRefreshView"),  # type: ignore
+    path("refresh/", TokenRefreshView.as_view(), name="token-refresh"),  # type: ignore
 ]

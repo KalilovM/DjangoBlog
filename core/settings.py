@@ -57,7 +57,7 @@ REST_FRAMEWORK = {
 
 CSRF_COOKIE_SECURE = True
 
-# AUTH_USER_MODEL = "users.Profile"
+AUTH_USER_MODEL = "users.User"
 ROOT_URLCONF = "core.urls"
 
 TEMPLATES = [
